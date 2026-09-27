@@ -1,0 +1,222 @@
+{
+  "name": "dev-notes",
+  "publisher": "local",
+  "displayName": "Dev Notes",
+  "description": "Local-first developer notes in Markdown and text files",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.138.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "devNotes",
+          "title": "Dev Notes",
+          "icon": "resources/dev-notes.svg"
+        }
+      ]
+    },
+    "views": {
+      "devNotes": [
+        {
+          "id": "devNotes.notes",
+          "name": "Notes",
+          "icon": "resources/dev-notes.svg"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "devNotes.newNote",
+        "title": "Dev Notes: New Note",
+        "icon": "$(note)"
+      },
+      {
+        "command": "devNotes.newFolder",
+        "title": "Dev Notes: New Folder",
+        "icon": "$(new-folder)"
+      },
+      {
+        "command": "devNotes.rename",
+        "title": "Dev Notes: Rename",
+        "icon": "$(edit)"
+      },
+      {
+        "command": "devNotes.delete",
+        "title": "Dev Notes: Delete",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "devNotes.refresh",
+        "title": "Dev Notes: Refresh",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "devNotes.openNotesFolder",
+        "title": "Dev Notes: Open Notes Folder",
+        "icon": "$(folder-opened)"
+      },
+      {
+        "command": "devNotes.openNote",
+        "title": "Dev Notes: Open Note"
+      },
+      {
+        "command": "devNotes.revealNote",
+        "title": "Reveal in File Manager",
+        "icon": "$(folder-opened)"
+      },
+      {
+        "command": "devNotes.addRoot",
+        "title": "Dev Notes: Add Folder",
+        "icon": "$(folder-opened)"
+      },
+      {
+        "command": "devNotes.removeRoot",
+        "title": "Dev Notes: Remove Folder"
+      }
+    ],
+    "configuration": {
+      "title": "Dev Notes",
+      "properties": {
+        "devNotes.notesDirectory": {
+          "type": "string",
+          "default": "~/DevNotes",
+          "description": "Local folder where Dev Notes stores Markdown and text files."
+        },
+        "devNotes.googleDriveFolderName": {
+          "type": "string",
+          "default": "Dev Notes",
+          "description": "Google Drive folder used for synchronization."
+        },
+        "devNotes.autoSync": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically synchronize notes when supported."
+        },
+        "devNotes.syncOnSave": {
+          "type": "boolean",
+          "default": true,
+          "description": "Synchronize a note after it is saved when supported."
+        }
+      }
+    },
+    "menus": {
+      "view/item/context": [
+        {
+          "command": "devNotes.openNote",
+          "when": "view == devNotes.notes && viewItem == note",
+          "group": "inline@1"
+        },
+        {
+          "command": "devNotes.revealNote",
+          "when": "view == devNotes.notes && viewItem == note",
+          "group": "3_open"
+        },
+        {
+          "command": "devNotes.newNote",
+          "when": "view == devNotes.notes && viewItem == folder",
+          "group": "1_create"
+        },
+        {
+          "command": "devNotes.newFolder",
+          "when": "view == devNotes.notes && viewItem == folder",
+          "group": "1_create"
+        },
+        {
+          "command": "devNotes.newNote",
+          "when": "view == devNotes.notes && (viewItem == root || viewItem == defaultRoot)",
+          "group": "1_create"
+        },
+        {
+          "command": "devNotes.newFolder",
+          "when": "view == devNotes.notes && (viewItem == root || viewItem == defaultRoot)",
+          "group": "1_create"
+        },
+        {
+          "command": "devNotes.openNotesFolder",
+          "when": "view == devNotes.notes && (viewItem == root || viewItem == defaultRoot)",
+          "group": "1_open"
+        },
+        {
+          "command": "devNotes.removeRoot",
+          "when": "view == devNotes.notes && viewItem == root",
+          "group": "3_manage"
+        },
+        {
+          "command": "devNotes.rename",
+          "when": "view == devNotes.notes && (viewItem == note || viewItem == folder)",
+          "group": "2_manage"
+        },
+        {
+          "command": "devNotes.delete",
+          "when": "view == devNotes.notes && (viewItem == note || viewItem == folder)",
+          "group": "2_manage"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "devNotes.addRoot",
+          "when": "view == devNotes.notes",
+          "group": "navigation"
+        },
+        {
+          "command": "devNotes.newNote",
+          "when": "view == devNotes.notes",
+          "group": "navigation"
+        },
+        {
+          "command": "devNotes.newFolder",
+          "when": "view == devNotes.notes",
+          "group": "navigation"
+        },
+        {
+          "command": "devNotes.refresh",
+          "when": "view == devNotes.notes",
+          "group": "navigation"
+        },
+        {
+          "command": "devNotes.openNotesFolder",
+          "when": "view == devNotes.notes",
+          "group": "navigation"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run package",
+    "compile": "npm run check-types && npm run lint && node esbuild.js",
+    "watch": "npm-run-all -p watch:*",
+    "watch:esbuild": "node esbuild.js --watch",
+    "watch:tsc": "tsc --noEmit --watch --project tsconfig.json",
+    "package": "npm run check-types && npm run lint && node esbuild.js --production",
+    "package:vsix": "vsce package --allow-missing-repository --skip-license",
+    "compile-tests": "tsc -p . --outDir out",
+    "watch-tests": "tsc -p . -w --outDir out",
+    "pretest": "npm run compile-tests && npm run compile && npm run lint",
+    "check-types": "tsc --noEmit",
+    "lint": "eslint src",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.10",
+    "@types/node": "24.x",
+    "@types/vscode": "^1.138.0",
+    "@vscode/test-cli": "^0.0.15",
+    "@vscode/test-electron": "^3.0.0",
+    "@vscode/vsce": "^4.0.0",
+    "esbuild": "^0.28.1",
+    "eslint": "^10.5.0",
+    "npm-run-all": "^4.1.5",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.61.1"
+  },
+  "overrides": {
+    "diff": "^8.0.4",
+    "serialize-javascript": "^7.0.6"
+  }
+}

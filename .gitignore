@@ -1,0 +1,12 @@
+out
+dist
+node_modules
+.vscode-test/
+*.vsix
+.DS_Store
+.env
+.env.*
+!.env.example
+client_secret*.json
+credentials*.json
+token*.json
