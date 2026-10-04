@@ -25,13 +25,17 @@ export function registerCommands(
     if (!name) {
       return;
     }
-    const format = await vscode.window.showQuickPick(
-      [
-        { label: "Markdown", extension: ".md" as const },
-        { label: "Text", extension: ".txt" as const },
-      ],
-      { placeHolder: "Choose a file type" },
+    const formats = [
+      { label: "Markdown", extension: ".md" as const },
+      { label: "Text", extension: ".txt" as const },
+    ];
+    const defaultExtension = vscode.workspace
+      .getConfiguration("devNotes")
+      .get<"md" | "txt">("defaultNoteExtension", "md");
+    const defaultFormat = formats.find(
+      (format) => format.extension === `.${defaultExtension}`,
     );
+    const format = await pickNoteFormat(formats, defaultFormat);
     if (!format) {
       return;
     }
@@ -135,7 +139,8 @@ export function registerCommands(
     }
     await runCommand(async () => {
       const uri = vscode.Uri.file(selection.resourcePath);
-      if (path.extname(selection.resourcePath).toLowerCase() === ".pdf") {
+      const extension = path.extname(selection.resourcePath).toLowerCase();
+      if (extension !== ".md" && extension !== ".txt") {
         await vscode.env.openExternal(uri);
         return;
       }
@@ -211,6 +216,36 @@ export function registerCommands(
 
 function parentPath(selection: NoteTreeItem): string {
   return path.dirname(selection.resourcePath);
+}
+
+function pickNoteFormat(
+  formats: readonly { label: string; extension: NoteExtension }[],
+  defaultFormat: { label: string; extension: NoteExtension } | undefined,
+): Promise<{ label: string; extension: NoteExtension } | undefined> {
+  return new Promise((resolve) => {
+    const picker = vscode.window.createQuickPick<{
+      label: string;
+      extension: NoteExtension;
+    }>();
+    let finished = false;
+    const finish = (
+      selection: { label: string; extension: NoteExtension } | undefined,
+    ) => {
+      if (finished) {
+        return;
+      }
+      finished = true;
+      picker.dispose();
+      resolve(selection);
+    };
+
+    picker.items = [...formats];
+    picker.placeholder = "Choose a file type";
+    picker.activeItems = defaultFormat ? [defaultFormat] : [];
+    picker.onDidAccept(() => finish(picker.selectedItems[0]));
+    picker.onDidHide(() => finish(undefined));
+    picker.show();
+  });
 }
 
 async function runCommand(action: () => Promise<void>): Promise<void> {

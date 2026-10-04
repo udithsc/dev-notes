@@ -46,6 +46,25 @@ suite("NotesManager", () => {
     );
   });
 
+  test("filters files by configured extensions and supports the all-files option", async () => {
+    await notesManager.ensureRoot();
+    await fs.writeFile(path.join(notesManager.rootPath, "note.md"), "");
+    await fs.writeFile(path.join(notesManager.rootPath, "reference.pdf"), "");
+    await fs.writeFile(path.join(notesManager.rootPath, "image.png"), "");
+
+    const pdfManager = new NotesManager(notesManager.rootPath, ["pdf"]);
+    assert.deepEqual(
+      (await pdfManager.getEntries()).map((entry) => entry.name),
+      ["reference.pdf"],
+    );
+
+    const allFilesManager = new NotesManager(notesManager.rootPath, ["*"]);
+    assert.deepEqual(
+      (await allFilesManager.getEntries()).map((entry) => entry.name),
+      ["image.png", "note.md", "reference.pdf"],
+    );
+  });
+
   test("creates, renames while preserving the extension, and deletes a note", async () => {
     await notesManager.ensureRoot();
     const originalPath = await notesManager.createNote("use-hook", ".md");

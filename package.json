@@ -33,12 +33,12 @@
     "commands": [
       {
         "command": "devNotes.newNote",
-        "title": "Dev Notes: New Note",
+        "title": "Dev Notes: Create a New Note",
         "icon": "$(note)"
       },
       {
         "command": "devNotes.newFolder",
-        "title": "Dev Notes: New Folder",
+        "title": "Dev Notes: Create a New Folder",
         "icon": "$(new-folder)"
       },
       {
@@ -53,12 +53,12 @@
       },
       {
         "command": "devNotes.refresh",
-        "title": "Dev Notes: Refresh",
+        "title": "Dev Notes: Refresh Notes List",
         "icon": "$(refresh)"
       },
       {
         "command": "devNotes.openNotesFolder",
-        "title": "Dev Notes: Open Notes Folder",
+        "title": "Dev Notes: Open Default Notes Folder",
         "icon": "$(folder-opened)"
       },
       {
@@ -72,7 +72,7 @@
       },
       {
         "command": "devNotes.addRoot",
-        "title": "Dev Notes: Add Folder",
+        "title": "Dev Notes: Add an Existing Notes Folder",
         "icon": "$(folder-opened)"
       },
       {
@@ -87,6 +87,20 @@
           "type": "string",
           "default": "~/DevNotes",
           "description": "Local folder where Dev Notes stores Markdown and text files."
+        },
+        "devNotes.defaultNoteExtension": {
+          "type": "string",
+          "enum": [
+            "md",
+            "txt"
+          ],
+          "default": "md",
+          "description": "Default extension selected when creating a new note."
+        },
+        "devNotes.fileExtensions": {
+          "type": "string",
+          "default": "md,txt,pdf",
+          "description": "Comma-separated file extensions shown in the Notes tree, without dots. Use * to show all files."
         },
         "devNotes.googleDriveFolderName": {
           "type": "string",

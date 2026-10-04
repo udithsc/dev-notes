@@ -4,7 +4,6 @@ import { homedir } from "node:os";
 
 export type NoteEntryKind = "folder" | "note";
 export type NoteExtension = ".md" | ".txt";
-type SupportedFileExtension = NoteExtension | ".pdf";
 
 export interface NoteEntry {
   readonly name: string;
@@ -12,17 +11,24 @@ export interface NoteEntry {
   readonly kind: NoteEntryKind;
 }
 
-const supportedExtensions = new Set<SupportedFileExtension>([
-  ".md",
-  ".txt",
-  ".pdf",
-]);
-
 export class NotesManager {
   readonly rootPath: string;
+  private visibleExtensions: Set<string>;
 
-  constructor(directory: string) {
+  constructor(
+    directory: string,
+    visibleExtensions: readonly string[] = ["md", "txt", "pdf"],
+  ) {
     this.rootPath = expandHomeDirectory(directory);
+    this.visibleExtensions = normalizeExtensions(visibleExtensions);
+  }
+
+  setVisibleExtensions(extensions: readonly string[]): void {
+    this.visibleExtensions = normalizeExtensions(extensions);
+  }
+
+  getVisibleExtensions(): string[] {
+    return [...this.visibleExtensions];
   }
 
   async ensureRoot(): Promise<void> {
@@ -49,7 +55,10 @@ export class NotesManager {
       const entryPath = path.join(safeDirectory, entry.name);
       if (entry.isDirectory()) {
         notes.push({ name: entry.name, path: entryPath, kind: "folder" });
-      } else if (entry.isFile() && isSupportedNote(entry.name)) {
+      } else if (
+        entry.isFile() &&
+        isSupportedNote(entry.name, this.visibleExtensions)
+      ) {
         notes.push({ name: entry.name, path: entryPath, kind: "note" });
       }
     }
@@ -87,19 +96,22 @@ export class NotesManager {
     let safeName = validateSegment(newName);
 
     if (details.isFile()) {
-      const oldExtension = path
-        .extname(safeTarget)
-        .toLowerCase() as SupportedFileExtension;
-      if (!supportedExtensions.has(oldExtension)) {
-        throw new Error("Only .md, .txt, and .pdf files can be renamed here.");
+      const oldExtension = path.extname(safeTarget).toLowerCase();
+      if (!isSupportedNote(safeTarget, this.visibleExtensions)) {
+        throw new Error(
+          "This file extension is not enabled in Dev Notes settings.",
+        );
       }
       const newExtension = path.extname(safeName).toLowerCase();
       if (newExtension === "") {
         safeName += oldExtension;
       } else if (
-        !supportedExtensions.has(newExtension as SupportedFileExtension)
+        !this.visibleExtensions.has("*") &&
+        !this.visibleExtensions.has(newExtension.slice(1))
       ) {
-        throw new Error("Files must use the .md, .txt, or .pdf extension.");
+        throw new Error(
+          "The new extension is not enabled in Dev Notes settings.",
+        );
       }
     } else if (!details.isDirectory()) {
       throw new Error("Only notes and folders can be renamed.");
@@ -144,10 +156,21 @@ function expandHomeDirectory(directory: string): string {
   return path.resolve(directory);
 }
 
-function isSupportedNote(name: string): boolean {
-  return supportedExtensions.has(
-    path.extname(name).toLowerCase() as SupportedFileExtension,
-  );
+function isSupportedNote(
+  name: string,
+  visibleExtensions: Set<string>,
+): boolean {
+  if (visibleExtensions.has("*")) {
+    return true;
+  }
+  return visibleExtensions.has(path.extname(name).slice(1).toLowerCase());
+}
+
+function normalizeExtensions(extensions: readonly string[]): Set<string> {
+  const normalized = extensions
+    .map((extension) => extension.trim().replace(/^\./, "").toLowerCase())
+    .filter(Boolean);
+  return new Set(normalized.length ? normalized : ["md", "txt", "pdf"]);
 }
 
 function normalizeNoteName(name: string, extension: NoteExtension): string {

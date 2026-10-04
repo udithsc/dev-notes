@@ -70,7 +70,10 @@ export class NotesTreeProvider implements vscode.TreeDataProvider<NoteTreeItem> 
   }
 
   async addRoot(directory: string): Promise<string> {
-    const manager = new NotesManager(directory);
+    const manager = new NotesManager(
+      directory,
+      this.defaultNotesManager.getVisibleExtensions(),
+    );
     await manager.validateRoot();
     if (manager.rootPath === this.defaultNotesManager.rootPath) {
       return manager.rootPath;
@@ -103,6 +106,13 @@ export class NotesTreeProvider implements vscode.TreeDataProvider<NoteTreeItem> 
 
   getAdditionalRootPaths(): string[] {
     return [...this.additionalRootPaths];
+  }
+
+  setVisibleExtensions(extensions: readonly string[]): void {
+    for (const manager of this.managers.values()) {
+      manager.setVisibleExtensions(extensions);
+    }
+    this.refresh();
   }
 
   refresh(): void {

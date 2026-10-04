@@ -9,7 +9,7 @@ Dev Notes is a local-first VS Code extension for organizing developer notes as o
 - Creates, renames, deletes, refreshes, and opens local notes and folders.
 - Watches the default and added directories for external file changes.
 - Adds existing directories as extra roots in the Notes view; added roots persist across VS Code restarts.
-- Opens Markdown and text files in VS Code, and PDFs in the system's default PDF viewer.
+- Opens Markdown and text files in VS Code; PDFs and other configured file types open with the system's default viewer.
 - Ignores files other than Markdown, plain text, and PDF.
 
 ## Use
@@ -32,7 +32,13 @@ The Command Palette provides:
 
 ## Configuration
 
-`devNotes.notesDirectory` sets the local notes folder. It defaults to `~/DevNotes`; a leading `~/` expands to the current user's home directory. Relative paths resolve from the extension host's current working directory.
+Open **Preferences: Open Settings** and search for `@ext:local.dev-notes` to change Dev Notes settings:
+
+- `devNotes.notesDirectory` sets the default local notes folder. It defaults to `~/DevNotes`; a leading `~/` expands to the current user's home directory. Reload VS Code after changing it.
+- `devNotes.defaultNoteExtension` chooses the initially highlighted format for new notes (`md` or `txt`). The New Note picker still lets you choose the other format.
+- `devNotes.fileExtensions` is a comma-separated list of file extensions shown in each Notes root, without dots. It defaults to `md,txt,pdf`; set it to `*` to show all files. Changes apply immediately.
+
+Additional folders added with **Dev Notes: Add Folder** are managed separately from the default notes-directory setting.
 
 The `devNotes.googleDriveFolderName`, `devNotes.autoSync`, and `devNotes.syncOnSave` settings are reserved for the planned Drive integration. Google authentication and synchronization are not implemented in this phase.
 

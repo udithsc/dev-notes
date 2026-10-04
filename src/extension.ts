@@ -55,6 +55,28 @@ export async function activate(
     }),
   );
 
+  context.subscriptions.push(
+    vscode.workspace.onDidChangeConfiguration((event) => {
+      if (event.affectsConfiguration("devNotes.fileExtensions")) {
+        treeProvider.setVisibleExtensions(getConfig().fileExtensions);
+      }
+      if (event.affectsConfiguration("devNotes.notesDirectory")) {
+        void vscode.window
+          .showInformationMessage(
+            "Reload VS Code to apply the new default notes folder.",
+            "Reload Window",
+          )
+          .then((selection) => {
+            if (selection === "Reload Window") {
+              return vscode.commands.executeCommand(
+                "workbench.action.reloadWindow",
+              );
+            }
+          });
+      }
+    }),
+  );
+
   try {
     await notesManager.ensureRoot();
   } catch (error) {
